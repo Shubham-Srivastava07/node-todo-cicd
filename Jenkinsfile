@@ -14,24 +14,18 @@ pipeline{
                 sh "docker build -t node-app ."
             }
         }
-        stage("Push to DockerHub") {
-    steps {
-        withCredentials([usernamePassword(
-            credentialsId: "dockerHubcred", // Correct parameter name: credentialsId, not credentialsID
-            usernameVariable: "dockerHubUser",
-            passwordVariable: "dockerHubPass")]) {
-                
-            // Log in to DockerHub
-            sh 'echo $dockerHubPass | docker login -u $dockerHubUser --password-stdin'
-            
-            // Tag the image for DockerHub
-            sh "docker image tag node-app:latest ${dockerHubUser}/node-app:latest"
-            
-            // Push the image to DockerHub
-            sh "docker push ${dockerHubUser}/node-app:latest"
+       stage("Push To DockerHub"){
+            steps{
+                withCredentials([usernamePassword(
+                    credentialsId:"dockerHubCreds",
+                    usernameVariable:"dockerHubUser", 
+                    passwordVariable:"dockerHubPass")]){
+                sh 'echo $dockerHubPass | docker login -u $dockerHubUser --password-stdin'
+                sh "docker image tag node-app:latest ${env.dockerHubUser}/node-app:latest"
+                sh "docker push ${env.dockerHubUser}/node-app:latest"
+                }
+            }
         }
-    }
-}
 
         stage("Deploy"){
             steps{
